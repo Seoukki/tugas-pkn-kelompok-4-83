@@ -1,30 +1,130 @@
 'use strict';
 /* ══════════════════════════════════════════
-   QUESTION DATABASE — 21 soal
+   QUESTION DATABASE — 20 soal Literasi Digital
 ══════════════════════════════════════════ */
 const QDB=[
-  {q:"Kota manakah yang ditetapkan sebagai ibu kota baru Republik Indonesia menggantikan Jakarta?",o:["Nusantara","Balikpapan","Samarinda","Palangkaraya"],a:0,exp:"Nusantara adalah ibu kota baru RI di Penajam Paser Utara, Kalimantan Timur, berdasarkan UU No.3 Tahun 2022. Pemindahannya bertujuan pemerataan pembangunan Indonesia."},
-  {q:"Siapakah dua tokoh yang memproklamasikan kemerdekaan Indonesia pada 17 Agustus 1945?",o:["Soekarno & Mohammad Hatta","Soekarno & Sutan Sjahrir","Mohammad Hatta & Ki Hajar Dewantara","Soedirman & Soekarno"],a:0,exp:"Soekarno membacakan teks proklamasi dan Mohammad Hatta menandatanganinya sebagai Wakil Presiden. Proklamasi dibacakan di Jl. Pegangsaan Timur 56, Jakarta Pusat."},
-  {q:"Pada tanggal berapa tepatnya Indonesia memproklamasikan kemerdekaannya?",o:["17 Agustus 1945","20 Mei 1945","1 Juni 1945","28 Oktober 1928"],a:0,exp:"17 Agustus 1945 adalah Hari Kemerdekaan Indonesia. Angka 17-8-45 penuh makna: 17 rakaat sholat, bulan Agustus (8), tahun 45 kemerdekaan."},
-  {q:"Apakah semboyan nasional Indonesia yang tertulis pada pita di bawah lambang Garuda Pancasila?",o:["Bhinneka Tunggal Ika","Satu Nusa Satu Bangsa","Tut Wuri Handayani","Ing Ngarso Sung Tulodo"],a:0,exp:"Bhinneka Tunggal Ika dari Kitab Sutasoma karya Mpu Tantular, artinya 'Berbeda-beda tetapi tetap satu jua'. Mencerminkan keberagaman 1.300+ suku bangsa Indonesia."},
-  {q:"Berapa jumlah provinsi yang dimiliki Indonesia berdasarkan pemekaran wilayah terbaru (2024)?",o:["38 Provinsi","34 Provinsi","36 Provinsi","40 Provinsi"],a:0,exp:"Per 2024, Indonesia memiliki 38 provinsi setelah pemekaran 4 provinsi baru di Papua: Papua Selatan, Papua Tengah, Papua Pegunungan, dan Papua Barat Daya."},
-  {q:"Siapakah komponis yang menciptakan lagu kebangsaan Indonesia Raya yang pertama dikumandangkan tahun 1928?",o:["Wage Rudolf Supratman","Ismail Marzuki","C. Simanjuntak","Kusbini"],a:0,exp:"WR Supratman memainkan Indonesia Raya pertama kali dengan biola pada Kongres Pemuda II, 28 Oktober 1928. Beliau lahir di Jatinegara, 9 Maret 1903."},
-  {q:"Di manakah letak puncak tertinggi di Indonesia yang termasuk Seven Summits dunia?",o:["Puncak Jaya, Papua","Gunung Semeru, Jawa Timur","Gunung Rinjani, NTB","Gunung Kerinci, Sumatera"],a:0,exp:"Puncak Jaya (Carstensz Pyramid) setinggi 4.884 mdpl di Papua adalah puncak tertinggi Indonesia & Oseania, satu-satunya dari 7 puncak dunia berselimut gletser tropis."},
-  {q:"Danau vulkanik terbesar di dunia yang terletak di Sumatera Utara dan menjadi kebanggaan Indonesia adalah?",o:["Danau Toba","Danau Maninjau","Danau Singkarak","Danau Ranau"],a:0,exp:"Danau Toba terbentuk dari letusan supervulkan 74.000 tahun lalu. Luas 1.145 km², kedalaman 505 meter — salah satu letusan terbesar dalam sejarah Bumi."},
-  {q:"Berapa jumlah sila dalam dasar negara Indonesia, Pancasila?",o:["5 Sila","4 Sila","6 Sila","3 Sila"],a:0,exp:"Pancasila (panca=lima, sila=asas) berisi 5 sila yang dirumuskan Soekarno 1 Juni 1945: Ketuhanan, Kemanusiaan, Persatuan, Kerakyatan, dan Keadilan."},
-  {q:"Burung apakah yang dijadikan lambang negara Republik Indonesia dalam Garuda Pancasila?",o:["Elang Jawa (Garuda)","Cendrawasih","Jalak Bali","Elang Bondol"],a:0,exp:"Garuda Pancasila terinspirasi dari Elang Jawa (Spizaetus bartelsi). Dirancang Sultan Hamid II, disempurnakan Soekarno, resmi digunakan sejak 11 Februari 1950."},
-  {q:"Sungai manakah yang merupakan sungai terpanjang di Indonesia, terletak di Kalimantan?",o:["Sungai Kapuas","Sungai Mahakam","Sungai Barito","Sungai Musi"],a:0,exp:"Sungai Kapuas di Kalimantan Barat sepanjang 1.143 km adalah sungai terpanjang Indonesia. Jalur transportasi vital dan sumber kehidupan masyarakat Dayak."},
-  {q:"Tari Saman yang terkenal dengan gerakannya kompak dan cepat berasal dari provinsi mana?",o:["Aceh","Bali","Sumatera Barat","Kalimantan Timur"],a:0,exp:"Tari Saman dari Gayo, Aceh, diakui UNESCO 2011. Dilakukan serentak banyak penari dengan gerakan tangan yang luar biasa cepat dan berirama."},
-  {q:"Komodo, hewan purba yang kini dilindungi, hidup endemik di pulau mana?",o:["Pulau Komodo & Rinca","Pulau Flores","Pulau Lombok","Pulau Sumbawa"],a:0,exp:"Komodo (Varanus komodoensis) hanya hidup di Pulau Komodo, Rinca, Gili Motang, dan sebagian Flores. Panjang 3m, berat 70kg, dengan gigitan berbisa mematikan."},
-  {q:"Pada tahun berapa UNESCO secara resmi mengakui Batik Indonesia sebagai Warisan Budaya Tak Benda?",o:["2009","2003","2012","2015"],a:0,exp:"2 Oktober 2009, UNESCO mengakui Batik Indonesia. Tanggal ini diperingati sebagai Hari Batik Nasional. Indonesia punya lebih dari 5.000 motif batik yang unik."},
-  {q:"Buah apakah yang dikenal sebagai Raja Buah di Asia Tenggara dan beraroma sangat kuat?",o:["Durian","Rambutan","Manggis","Nangka"],a:0,exp:"Durian (Durio zibethinus) dijuluki Raja Buah. Dilarang di banyak hotel dan transportasi umum di Asia karena bau khasnya yang sangat menyengat."},
-  {q:"Mata uang resmi yang digunakan oleh Negara Kesatuan Republik Indonesia adalah?",o:["Rupiah (IDR)","Ringgit","Peso","Baht"],a:0,exp:"Rupiah (IDR) adalah mata uang Indonesia sejak 1946, dari kata Sansekerta 'rupya' (perak). Bank Indonesia sebagai bank sentral menerbitkan dan mengedarkannya."},
-  {q:"Setiap tanggal berapa Hari Sumpah Pemuda diperingati sebagai momentum persatuan bangsa?",o:["28 Oktober","17 Agustus","20 Mei","21 April"],a:0,exp:"Sumpah Pemuda lahir 28 Oktober 1928 dalam Kongres Pemuda II di Jakarta: satu tanah air, satu bangsa, satu bahasa — Indonesia."},
-  {q:"Siapakah Presiden pertama Republik Indonesia yang menjabat dari tahun 1945 hingga 1967?",o:["Ir. Soekarno","Jenderal Soeharto","B.J. Habibie","Sri Sultan HB IX"],a:0,exp:"Ir. Soekarno (Bung Karno) adalah Presiden RI pertama dan Bapak Bangsa. Orator ulung, tokoh Non-Blok, penggagas Konferensi Asia-Afrika 1955."},
-  {q:"Candi Borobudur, candi Buddha terbesar di dunia, terletak di provinsi mana?",o:["Jawa Tengah","Jawa Timur","DI Yogyakarta","Jawa Barat"],a:0,exp:"Borobudur di Magelang, Jawa Tengah, dibangun abad ke-8 oleh Dinasti Syailendra. Memiliki 504 arca Buddha, 2.672 panel relief, Warisan Dunia UNESCO sejak 1991."},
-  {q:"Laut manakah yang memisahkan Pulau Jawa dan Pulau Sumatera?",o:["Selat Sunda","Selat Malaka","Selat Lombok","Selat Bali"],a:0,exp:"Selat Sunda memisahkan Jawa dan Sumatera, terkenal sebagai lokasi meletusnya Krakatau 1883. Juga jalur utama pelayaran internasional dari Samudra Hindia ke Laut Jawa."},
-  {q:"Lagu daerah 'Ampar-Ampar Pisang' berasal dari provinsi mana di Indonesia?",o:["Kalimantan Selatan","Kalimantan Timur","Sulawesi Selatan","Sumatera Selatan"],a:0,exp:"Ampar-Ampar Pisang adalah lagu tradisional Banjar dari Kalimantan Selatan. Menceritakan anak-anak yang menjemur pisang di atas tikar pandan sambil bermain."},
+  {
+    q: "Berdasarkan riset Hootsuite 2020, rata-rata waktu yang dihabiskan pengguna internet di Indonesia untuk berselancar dalam sehari adalah...",
+    o: ["7 jam 59 menit", "6 jam 43 menit", "8 jam 30 menit", "5 jam 15 menit"],
+    a: 0,
+    exp: "Data riset menunjukkan intensitas penggunaan internet di Indonesia sangat tinggi, melampaui angka rata-rata global yang hanya berkisar 6 jam 43 menit."
+  },
+  {
+    q: "Peneliti yang membuktikan bahwa berita bohong yang dipublikasikan terus-menerus akan memengaruhi opini publik adalah...",
+    o: ["Van Der Bilt", "David Bawden", "Allan Martin", "Septiaji Eko Nugroho"],
+    a: 0,
+    exp: "Penelitian Van Der Bilt membuktikan bahwa informasi bohong dapat dianggap sebagai kebenaran oleh masyarakat jika dipublikasikan secara berulang-ulang."
+  },
+  {
+    q: "Peneliti Van Der Bilt yang melakukan riset tentang dampak negatif berita bohong berasal dari...",
+    o: ["Universitas Tennessee", "Universitas Indonesia", "Universitas San Francisco", "Universitas Stanford"],
+    a: 0,
+    exp: "Data penelitian mengenai pengaruh informasi bohong terhadap opini publik ini valid dilakukan oleh peneliti dari Universitas Tennessee."
+  },
+  {
+    q: "Berdasarkan Global Digital Reports 2020, jumlah pengguna internet di Indonesia sudah mencapai...",
+    o: ["175,4 juta orang", "160,0 juta orang", "272,1 juta orang", "338,2 juta orang"],
+    a: 0,
+    exp: "Jumlah ini setara dengan sekitar 64% dari total jumlah penduduk Indonesia pada saat riset tersebut dilakukan."
+  },
+  {
+    q: "Kemampuan untuk memilih dan mengolah informasi saat berhadapan dengan berbagai informasi dalam dunia digital disebut...",
+    o: ["Digital Competence", "Digital Usage", "Digital Transformation", "Digital Skill"],
+    a: 0,
+    exp: "Digital Competence mencakup keterampilan, konsep, pendekatan, dan sikap dalam memilah informasi di dunia digital."
+  },
+  {
+    q: "Level II dalam literasi digital (Digital Usage) mencakup penerapan teknologi untuk tujuan...",
+    o: ["Professional / discipline application", "Kemampuan dasar mengetik", "Inovasi bisnis baru", "Menghapus pesan spam"],
+    a: 0,
+    exp: "Digital Usage adalah tingkatan di mana pengguna memanfaatkan teknologi untuk kompetensi profesional atau disiplin ilmu tertentu."
+  },
+  {
+    q: "Platform inovasi digital bernama iGrow berfokus pada pengembangan di bidang...",
+    o: ["Pertanian", "Transportasi", "Kesehatan", "Perbankan"],
+    a: 0,
+    exp: "iGrow merupakan platform yang membantu kemandirian pangan dengan membantu petani meningkatkan hasil pertaniannya."
+  },
+  {
+    q: "Perbedaan utama antara Digital Transformation dengan Digital Competence adalah...",
+    o: ["Transformation pada organisasi, Competence pada kemampuan individu", "Transformation pada hardware, Competence pada software", "Transformation untuk pelajar, Competence untuk orang dewasa", "Tidak ada perbedaan antara keduanya"],
+    a: 0,
+    exp: "Transformasi digital adalah perubahan besar organisasi lewat teknologi, sementara kompetensi digital adalah kemampuan individu dalam menggunakannya secara efektif."
+  },
+  {
+    q: "Salah satu ciri yang paling menonjol dari berita bohong (hoax) adalah...",
+    o: ["Judulnya provokatif atau bombastis", "Menggunakan sumber data resmi", "Mencantumkan nama penulis secara jelas", "Foto yang digunakan asli tanpa editan"],
+    a: 0,
+    exp: "Hoax sering menggunakan judul bombastis untuk memancing emosi pembaca agar terpengaruh oleh isi berita yang dibuat."
+  },
+  {
+    q: "Cara memverifikasi keaslian sebuah foto berita berdasarkan penjelasan di buku adalah melalui...",
+    o: ["Penelusuran melalui Google (Google Lens)", "Aplikasi pesan singkat", "Kolom komentar media sosial", "Galeri handphone saja"],
+    a: 0,
+    exp: "Kita dapat mengecek keaslian foto dengan fitur penelusuran gambar (seperti Google Lens) untuk melihat apakah foto tersebut hasil editan atau bukan."
+  },
+  {
+    q: "Menurut David Bawden, salah satu aspek penting dalam literasi digital adalah...",
+    o: ["Kemampuan menyaring (filtering) informasi", "Kemampuan meretas situs web", "Kemampuan membeli perangkat terbaru", "Kemampuan membuat berita bohong"],
+    a: 0,
+    exp: "Melakukan saringan terhadap informasi yang diperoleh sangat penting agar kita tidak termakan oleh informasi yang salah."
+  },
+  {
+    q: "Ketua Komunitas Masyarakat Indonesia Anti Fitnah (Mafindo) adalah...",
+    o: ["Septiaji Eko Nugroho", "Nadiem Makarim", "Jim Oklahoma", "Andreas Sanjaya"],
+    a: 0,
+    exp: "Septiaji Eko Nugroho memberikan edukasi mengenai cara-cara mengidentifikasi berita bohong yang beredar di masyarakat."
+  },
+  {
+    q: "Etika dalam berkomunikasi dan berinteraksi di dunia maya disebut sebagai...",
+    o: ["Netiket", "Digital Native", "Digital Transformation", "Hoax"],
+    a: 0,
+    exp: "Netiket (Etika Berinternet) diperlukan agar komunikasi lintas provinsi maupun negara tetap berjalan harmonis tanpa pertikaian."
+  },
+  {
+    q: "Dampak negatif yang muncul jika pengguna internet tidak menerapkan etika berinternet adalah...",
+    o: ["Kegaduhan dan pertikaian", "Kemajuan bangsa", "Literasi digital", "Inovasi teknologi"],
+    a: 0,
+    exp: "Tanpa etika, konten yang dipublikasikan dapat memicu perselisihan yang merusak kerukunan dalam kebinekaan."
+  },
+  {
+    q: "Prinsip netiket 'Think before posting' memiliki arti bahwa kita harus berpikir dahulu sebelum...",
+    o: ["Menekan tombol enter atau mengunggah konten", "Menghapus akun media sosial", "Membeli kuota internet", "Mencari sinyal"],
+    a: 0,
+    exp: "Kita harus memastikan apakah postingan kita bermanfaat dan tidak menyinggung perasaan orang lain sebelum membagikannya."
+  },
+  {
+    q: "Prinsip netiket 'Saring sebelum sharing' dilakukan untuk memastikan bahwa konten tersebut...",
+    o: ["Benar dan valid", "Viral dan terkenal", "Menggunakan huruf kapital", "Berisi ujaran kebencian"],
+    a: 0,
+    exp: "Prinsip ini bertujuan agar kita tidak ikut menyebarkan berita bohong atau informasi yang merugikan orang lain."
+  },
+  {
+    q: "Ujaran kebencian (hate speech) sangat berbahaya karena dapat mengancam kerukunan dan memicu...",
+    o: ["Disintegrasi bangsa", "Integrasi nasional", "Literasi digital", "Kemajuan ekonomi"],
+    a: 0,
+    exp: "Konten negatif seperti ujaran kebencian dapat mengikis nilai luhur bangsa dan memecah belah persatuan."
+  },
+  {
+    q: "Dalam etika berinternet, menggunakan huruf kapital secara terus-menerus dianggap sebagai tindakan...",
+    o: ["Berteriak (shouting)", "Pesan rahasia", "Pesan yang sopan", "Judul berita resmi"],
+    a: 0,
+    exp: "Penggunaan huruf kapital (Caps Lock) menunjukkan emosi negatif dan kurang sopan saat berkomunikasi di dunia maya."
+  },
+  {
+    q: "Saat memberikan komentar atau menjawab pertanyaan di forum, bahasa yang digunakan harus...",
+    o: ["Tepat dan sopan", "Provokatif", "Bombastis", "Emosional"],
+    a: 0,
+    exp: "Menggunakan bahasa yang tepat dan sopan merupakan cerminan karakter bangsa yang menghargai perbedaan pendapat."
+  },
+  {
+    q: "Menghargai hak kekayaan intelektual orang lain dalam berinternet berarti kita dilarang...",
+    o: ["Mencuri karya atau data orang lain", "Membaca berita di internet", "Menggunakan emoji", "Mencari informasi di Google"],
+    a: 0,
+    exp: "Kita tidak boleh mengambil postingan, foto, atau data orang lain tanpa izin atau tanpa mencantumkan sumbernya."
+  }
 ];
+     
 
 /* ══════════════════════════════════════════
    BACKGROUND MUSIC
