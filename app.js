@@ -130,7 +130,7 @@ const QDB=[
    BACKGROUND MUSIC
 ══════════════════════════════════════════ */
 const BGM=(()=>{
-  let audio=null,vol=0.28,enabled=true;
+  let audio=null,vol=0.05,enabled=true;
   function getAudio(){
     if(!audio){
       audio=document.getElementById('bgm-audio');
@@ -140,8 +140,9 @@ const BGM=(()=>{
     return audio;
   }
   function play(){if(!enabled)return;const a=getAudio();if(a.paused)a.play().catch(()=>{});}
-  function duck(){const a=getAudio();if(enabled&&a.volume>0.04)a.volume=0.04;}
-  function restore(){const a=getAudio();if(enabled)a.volume=vol;}
+  let preDuck=vol;
+  function duck(){const a=getAudio();if(enabled&&a.volume>0.03){preDuck=a.volume;a.volume=0.03;}}
+  function restore(){const a=getAudio();if(enabled)a.volume=preDuck;}
   function setEnabled(on){enabled=on;const a=getAudio();if(on){a.volume=vol;play();}else a.pause();}
   function stop(){if(audio){audio.pause();audio.currentTime=0;}}
   return{play,duck,restore,setEnabled,stop,isEnabled:()=>enabled};
@@ -202,11 +203,14 @@ const Arena=(()=>{
     lastCheer:'none',cheerTime:0,
     cozy:{correct:0,total:20,skin:'#C68642',hair:'#1C0700'},
   };
+  // Smooth lerp positions
+  let sX1=-1,sX2=-1,sFlagX=-1;
 
   function init(){
     cv=document.getElementById('arena-canvas');
     if(!cv)return;
     cx=cv.getContext('2d');
+    sX1=-1;sX2=-1;sFlagX=-1;
     resize();
   }
   function resize(){
@@ -248,26 +252,78 @@ const Arena=(()=>{
     if(snap.mode===3){drawCozyBG();return;}
     // Night sky
     const sky=cx.createLinearGradient(0,0,0,H*.5);
-    sky.addColorStop(0,'#040810');sky.addColorStop(.5,'#0A1040');sky.addColorStop(1,'#1A2F7A');
+    sky.addColorStop(0,'#020610');sky.addColorStop(.4,'#06102E');sky.addColorStop(.8,'#0F1E5A');sky.addColorStop(1,'#1A3080');
     cx.fillStyle=sky;cx.fillRect(0,0,W,H*.5);
-    // Stars
+    // Aurora bands
+    [[H*.04,'rgba(18,220,120,.055)',0.38,1.8],[H*.14,'rgba(55,130,255,.05)',0.52,2.6],[H*.25,'rgba(150,80,255,.04)',0.66,0.8]].forEach(([yBase,color,spd,off],i)=>{
+      const wave=Math.sin(T*spd+off)*H*.028;
+      const xShift=Math.sin(T*0.22+i*1.4)*W*.1;
+      const ag=cx.createLinearGradient(0,yBase+wave,0,yBase+wave+H*.09);
+      ag.addColorStop(0,'transparent');ag.addColorStop(.35,color);ag.addColorStop(.65,color);ag.addColorStop(1,'transparent');
+      cx.save();cx.translate(xShift,0);cx.fillStyle=ag;cx.fillRect(-W*.15,yBase+wave,W*1.3,H*.09);cx.restore();
+    });
+    // Stars with twinkling and glow
     STARS.forEach(st=>{
-      cx.globalAlpha=.38+.34*Math.sin(T*1.7+st.ph);
-      cx.fillStyle='#fff';cx.beginPath();cx.arc(st.x*W,st.y*H*.5,st.r,0,Math.PI*2);cx.fill();
+      const tw=.32+.48*Math.sin(T*1.7+st.ph);
+      cx.globalAlpha=tw;
+      cx.fillStyle=st.ph>4?'#BFDBFE':st.ph>2?'#FEF3C7':'#fff';
+      cx.beginPath();cx.arc(st.x*W,st.y*H*.5,st.r,0,Math.PI*2);cx.fill();
+      if(st.r>1.2){cx.globalAlpha=tw*.18;cx.beginPath();cx.arc(st.x*W,st.y*H*.5,st.r*4,0,Math.PI*2);cx.fill();}
     });
     cx.globalAlpha=1;
-    // Moon
-    cx.fillStyle='rgba(254,243,199,.88)';cx.beginPath();cx.arc(W*.9,H*.13,W*.018,0,Math.PI*2);cx.fill();
-    cx.fillStyle='#0A1040';cx.beginPath();cx.arc(W*.913,H*.104,W*.013,0,Math.PI*2);cx.fill();
+    // Shooting star
+    const ssPer=9,ssPh=(T*.7)%ssPer;
+    if(ssPh<0.65){
+      const sp=ssPh/.65,a=sp<.5?sp*2:(1-sp)*2;
+      cx.save();cx.globalAlpha=a*.88;cx.strokeStyle='rgba(255,255,210,1)';cx.lineWidth=2;cx.lineCap='round';
+      cx.shadowColor='rgba(255,255,180,.9)';cx.shadowBlur=5;
+      const sx=W*.84-sp*W*.22,sy=H*.04+sp*H*.11;
+      cx.beginPath();cx.moveTo(sx,sy);cx.lineTo(sx+W*.055,sy-H*.028);cx.stroke();
+      cx.restore();
+    }
+    // Moon with glow
+    const mX=W*.88,mY=H*.12,mR=W*.019;
+    const mg=cx.createRadialGradient(mX,mY,mR*.5,mX,mY,mR*5.5);
+    mg.addColorStop(0,'rgba(254,243,199,.28)');mg.addColorStop(.45,'rgba(254,243,199,.05)');mg.addColorStop(1,'transparent');
+    cx.fillStyle=mg;cx.fillRect(mX-mR*6,mY-mR*6,mR*12,mR*12);
+    cx.fillStyle='rgba(254,243,199,.92)';cx.beginPath();cx.arc(mX,mY,mR,0,Math.PI*2);cx.fill();
+    cx.fillStyle='#06102E';cx.beginPath();cx.arc(mX+mR*.72,mY-mR*.62,mR*.74,0,Math.PI*2);cx.fill();
     // Ground
     const gnd=cx.createLinearGradient(0,H*.5,0,H);
-    gnd.addColorStop(0,'#14532D');gnd.addColorStop(.35,'#166534');gnd.addColorStop(1,'#0F2E1A');
+    gnd.addColorStop(0,'#133424');gnd.addColorStop(.3,'#155E2F');gnd.addColorStop(1,'#0A1F14');
     cx.fillStyle=gnd;cx.fillRect(0,H*.5,W,H*.5);
-    cx.fillStyle='rgba(74,222,128,.3)';cx.fillRect(0,H*.5,W,3);
-    for(let i=0;i<14;i++){
-      const gx=W*(i/14+.03);
-      cx.strokeStyle='rgba(74,222,128,.5)';cx.lineWidth=1.4;
-      cx.beginPath();cx.moveTo(gx,H*.5);cx.lineTo(gx-2,H*.5-5);cx.moveTo(gx+3,H*.5);cx.lineTo(gx+4,H*.5-7);cx.stroke();
+    // Horizon glow
+    const hg=cx.createLinearGradient(0,H*.46,0,H*.56);
+    hg.addColorStop(0,'transparent');hg.addColorStop(.42,'rgba(28,100,55,.2)');hg.addColorStop(.58,'rgba(28,100,55,.2)');hg.addColorStop(1,'transparent');
+    cx.fillStyle=hg;cx.fillRect(0,H*.46,W,H*.1);
+    // Ground line
+    cx.fillStyle='rgba(74,222,128,.22)';cx.fillRect(0,H*.5,W,2);
+    // Grass blades
+    for(let i=0;i<18;i++){
+      const gx=W*(i/18+.02);cx.strokeStyle='rgba(74,222,128,.42)';cx.lineWidth=1.2;
+      cx.beginPath();cx.moveTo(gx,H*.5);cx.lineTo(gx-2,H*.5-6);cx.moveTo(gx+3,H*.5);cx.lineTo(gx+4,H*.5-9);cx.stroke();
+    }
+    // Torch glows near crowd
+    [[W*.05,H*.44],[W*.95,H*.44]].forEach(([tx,ty],i)=>{
+      const fl=.85+Math.sin(T*9.2+i*2.3)*.1+Math.sin(T*14.8+i)*.07;
+      const tg=cx.createRadialGradient(tx,ty,0,tx,ty,W*.1*fl);
+      tg.addColorStop(0,'rgba(255,165,30,.2)');tg.addColorStop(.5,'rgba(255,90,18,.07)');tg.addColorStop(1,'transparent');
+      cx.fillStyle=tg;cx.fillRect(tx-W*.13,ty-H*.08,W*.26,H*.22);
+    });
+    // Ground fireflies
+    for(let i=0;i<10;i++){
+      const ffX=W*(0.12+0.76*(((i*.618+T*.022)%1)));
+      const ffY=H*(0.525+.068*Math.sin(T*1.3+i*1.9));
+      const ffA=.25+.52*Math.sin(T*2.8+i*2.4);
+      if(ffA>.12){cx.globalAlpha=ffA;cx.fillStyle='#FBBF24';cx.shadowColor='rgba(251,191,36,.8)';cx.shadowBlur=8;cx.beginPath();cx.arc(ffX,ffY,1.8,0,Math.PI*2);cx.fill();}
+    }
+    cx.shadowBlur=0;cx.globalAlpha=1;
+    // Ground fog patches
+    for(let i=0;i<5;i++){
+      const fgX=W*((0.19*i+T*.013*(i%2?1:-1)+3)%1.3-.15);
+      const fgG=cx.createRadialGradient(fgX,H*.51,0,fgX,H*.51,W*.14);
+      fgG.addColorStop(0,'rgba(170,215,155,.07)');fgG.addColorStop(1,'transparent');
+      cx.fillStyle=fgG;cx.fillRect(fgX-W*.15,H*.48,W*.3,H*.07);
     }
   }
 
@@ -328,9 +384,10 @@ const Arena=(()=>{
     const ci=Math.max(0,1-(T-chT)*.85);
     function person(sx,hf,col,sk,hr,ph,isSign,side){
       const ex=(side==='left'&&chS==='left'||side==='right'&&chS==='right')&&ci>.12;
-      const bob=Math.sin(T*(2.6+ex*2.2)+ph)*(ex?.022:.012)*H;
+      // Crowd is static — only move when cheering
+      const bob=ex?Math.sin(T*(2.6+2.2)+ph)*.022*H:0;
       const ch=hf*H,cy=H*.5-ch+bob,cx2=sx*W;
-      const au=Math.sin(T*(3.2+ex*2)+ph*1.5)>.1||ex;
+      const au=ex; // Arms only raise when cheering
       cx.fillStyle='rgba(0,0,0,.17)';cx.beginPath();cx.ellipse(cx2,H*.5+2,ch*.23,4,0,0,Math.PI*2);cx.fill();
       cx.fillStyle=col;cx.globalAlpha=.78+ci*.11;
       cx.beginPath();cx.roundRect(cx2-ch*.18,cy,ch*.36,ch*.72,4);cx.fill();
@@ -388,18 +445,20 @@ const Arena=(()=>{
   // ── ROPE ──
   function drawRope(x1,y,x2){
     if(x2<=x1+4)return;
-    const sag=Math.max(3,(x2-x1)*.048+Math.sin(T*4.2)*(x2-x1)*.006);
+    const len=x2-x1;
+    // Taut rope — sag proportional to length but capped so it looks tight
+    const sag=Math.max(2,Math.min(len*.032,H*.04))+Math.sin(T*4.2)*len*.004;
     const mx=(x1+x2)/2,my=y+sag;
-    cx.shadowColor='rgba(0,0,0,.32)';cx.shadowBlur=6;cx.shadowOffsetY=3;
+    cx.shadowColor='rgba(0,0,0,.3)';cx.shadowBlur=6;cx.shadowOffsetY=3;
     cx.strokeStyle='#7C3A1A';cx.lineWidth=10;cx.lineCap='round';
     cx.beginPath();cx.moveTo(x1,y);cx.quadraticCurveTo(mx,my,x2,y);cx.stroke();
     cx.shadowColor='transparent';cx.shadowBlur=0;cx.shadowOffsetY=0;
     cx.strokeStyle='#92400E';cx.lineWidth=8;cx.beginPath();cx.moveTo(x1,y);cx.quadraticCurveTo(mx,my,x2,y);cx.stroke();
     cx.strokeStyle='#A16207';cx.lineWidth=5;cx.beginPath();cx.moveTo(x1,y);cx.quadraticCurveTo(mx,my,x2,y);cx.stroke();
-    cx.strokeStyle='rgba(245,158,11,.48)';cx.lineWidth=2;cx.setLineDash([7,6]);
+    cx.strokeStyle='rgba(245,158,11,.4)';cx.lineWidth=2;cx.setLineDash([7,6]);
     cx.beginPath();cx.moveTo(x1,y-1);cx.quadraticCurveTo(mx,my-1,x2,y-1);cx.stroke();cx.setLineDash([]);
-    const steps=Math.max(2,Math.floor((x2-x1)/18));
-    cx.strokeStyle='rgba(0,0,0,.17)';cx.lineWidth=1.2;
+    const steps=Math.max(2,Math.floor(len/20));
+    cx.strokeStyle='rgba(0,0,0,.15)';cx.lineWidth=1.2;
     for(let i=1;i<steps;i++){
       const t2=i/steps,gx=x1*(1-t2)+x2*t2,dy=sag*(1-(2*t2-1)**2);
       cx.beginPath();cx.moveTo(gx-2,y+dy-3);cx.lineTo(gx+2,y+dy+3);cx.stroke();
@@ -422,8 +481,8 @@ const Arena=(()=>{
   function S1(baseH){return Math.max(0.3,Math.min(1,(H*baseH)/100));}
 
   // ── DRAW HUMAN (mode 1, front-facing) ──
-  function drawHuman(x,y,tc,dc,sk,hr,flip,state,idx){
-    const u=S1(.92);
+  function drawHuman(x,y,tc,dc,sk,hr,flip,state,idx,edgeScale){
+    const u=S1(.92)*(edgeScale||1);
     if(u<.1)return;
     cx.save();cx.translate(x,y);if(flip)cx.scale(-1,1);
     const pull=state==='pull',fall=state==='fall',win=state==='win',corr=state==='correct',wrong=state==='wrong';
@@ -515,8 +574,8 @@ const Arena=(()=>{
   }
 
   // ── DRAW HUMAN SIDE (mode 2) ──
-  function drawHumanSide(x,y,tc,dc,sk,hr,faceRight,state,idx){
-    const u=S1(.72);
+  function drawHumanSide(x,y,tc,dc,sk,hr,faceRight,state,idx,edgeScale){
+    const u=S1(.72)*(edgeScale||1);
     if(u<.1)return;
     cx.save();cx.translate(x,y);if(!faceRight)cx.scale(-1,1);
     const pull=state==='pull',fall=state==='fall',win=state==='win',corr=state==='correct',wrong=state==='wrong';
@@ -641,9 +700,8 @@ const Arena=(()=>{
     drawBG();
     if(snap.mode===3){drawM3();return;}
     drawCrowd();
-    const diff=snap.mode===1?(snap.p1.score-snap.p2.score):(snap.t1.score-snap.t2.score);
-    const mx=snap.mode===1?20:8;
-    drawFlag(W*.5+Math.max(-W*.28,Math.min(W*.28,(diff/mx)*W*.24)));
+    // Flag is always fixed at center — only players move
+    drawFlag(W*.5);
     if(snap.mode===1)drawM1();else drawM2();
   }
 
@@ -652,37 +710,63 @@ const Arena=(()=>{
 
   function drawM1(){
     const p1=snap.p1,p2=snap.p2;
-    const mv=W*.32;
-    const x1=W*.14+(p1.score/20)*mv;
-    const x2=W*.86-(p2.score/20)*mv;
-    const gndY=H*.84;
-    // Boundary markers on ground
-    const boundL=W*.14,boundR=W*.86;
-    cx.strokeStyle='rgba(220,38,38,.6)';cx.lineWidth=3;cx.setLineDash([6,4]);
-    cx.beginPath();cx.moveTo(boundL,gndY-2);cx.lineTo(boundL,gndY-H*.08);cx.stroke();
-    cx.strokeStyle='rgba(30,64,175,.6)';cx.lineWidth=3;
-    cx.beginPath();cx.moveTo(boundR,gndY-2);cx.lineTo(boundR,gndY-H*.08);cx.stroke();
+    // Player 1 (left/orange) moves RIGHT as score grows
+    // Player 2 (right/blue) moves LEFT as score grows
+    const mv=W*.28;
+    const tx1=W*.12+(p1.score/20)*mv;
+    const tx2=W*.88-(p2.score/20)*mv;
+    if(sX1<0)sX1=tx1;
+    if(sX2<0)sX2=tx2;
+    sX1+=(tx1-sX1)*.10;
+    sX2+=(tx2-sX2)*.10;
+    const x1=sX1,x2=sX2;
+    const gndY=H*.88;
+    const ropeY=gndY-H*.21;
+
+    // Edge scale: shrink as player nears boundary
+    const eS1=Math.max(.2,Math.min(1,(x1/W)*10,((W-x1)/W)*10));
+    const eS2=Math.max(.2,Math.min(1,(x2/W)*10,((W-x2)/W)*10));
+
+    // Boundary dashed lines
+    const bnd1=W*.12,bnd2=W*.88;
+    cx.strokeStyle='rgba(220,38,38,.55)';cx.lineWidth=2.5;cx.setLineDash([5,4]);
+    cx.beginPath();cx.moveTo(bnd1,gndY);cx.lineTo(bnd1,gndY-H*.12);cx.stroke();
+    cx.strokeStyle='rgba(30,64,175,.55)';
+    cx.beginPath();cx.moveTo(bnd2,gndY);cx.lineTo(bnd2,gndY-H*.12);cx.stroke();
     cx.setLineDash([]);
-    // Boundary labels
-    cx.fillStyle='rgba(220,38,38,.5)';cx.font=`bold ${H*.02}px Bebas Neue`;cx.textAlign='center';
-    cx.fillText('BATAS',boundL,gndY-H*.09);
-    cx.fillStyle='rgba(30,64,175,.5)';cx.fillText('BATAS',boundR,gndY-H*.09);
-    // Center marker on rope
-    const ropeMid=(x1+x2)/2;
-    cx.fillStyle='rgba(245,158,11,.8)';cx.beginPath();cx.arc(ropeMid,gndY-H*.04,5,0,Math.PI*2);cx.fill();
+    cx.font=`bold ${H*.018}px Bebas Neue`;cx.textAlign='center';
+    cx.fillStyle='rgba(220,38,38,.45)';cx.fillText('BATAS',bnd1,gndY-H*.13);
+    cx.fillStyle='rgba(30,64,175,.45)';cx.fillText('BATAS',bnd2,gndY-H*.13);
+
+    // Center flag marker (fixed) — just a crosshair on the rope
+    cx.fillStyle='rgba(245,158,11,.75)';cx.beginPath();cx.arc(W*.5,ropeY,6,0,Math.PI*2);cx.fill();
     cx.strokeStyle='#B45309';cx.lineWidth=2;
-    cx.beginPath();cx.moveTo(ropeMid,gndY-H*.04-8);cx.lineTo(ropeMid,gndY-H*.04+8);cx.stroke();
-    cx.beginPath();cx.moveTo(ropeMid-8,gndY-H*.04);cx.lineTo(ropeMid+8,gndY-H*.04);cx.stroke();
-    drawRope(x1+12,gndY-H*.04,x2-12);
+    cx.beginPath();cx.moveTo(W*.5,ropeY-9);cx.lineTo(W*.5,ropeY+9);cx.stroke();
+    cx.beginPath();cx.moveTo(W*.5-9,ropeY);cx.lineTo(W*.5+9,ropeY);cx.stroke();
+
+    // ── ROPE: extends behind each player off-screen (clipped to canvas) ──
+    cx.save();cx.beginPath();cx.rect(0,0,W,H);cx.clip();
+    // Behind player 1 (left side, fade into left edge)
+    drawRope(-W*.04,ropeY,x1+8);
+    // Between players (through flag/center)
+    drawRope(x1+8,ropeY,x2-8);
+    // Behind player 2 (right side, fade into right edge)
+    drawRope(x2-8,ropeY,W*1.04);
+    cx.restore();
+
+    // Characters — side view (same as mode 2)
     const p1s=snap.fallenSide==='left'?'fall':(p1.state||'pull');
     const p2s=snap.fallenSide==='right'?'fall':(p2.state||'pull');
-    drawHuman(x1,gndY-H*.38,'#F97316','#C2410C',SK[0],HR[0],false,p1s,0);
+    // P1 faces right (toward rope center), P2 faces left (toward rope center)
+    drawHumanSide(x1,gndY,'#F97316','#C2410C',SK[0],HR[0],true,p1s,0,eS1);
     if(snap.fallenSide==='left')drawDust(x1,gndY,snap.fallProgress);
-    drawHuman(x2,gndY-H*.38,'#1E40AF','#1E3A8A',SK[1],HR[1],true,p2s,0);
+    drawHumanSide(x2,gndY,'#1E40AF','#1E3A8A',SK[1],HR[1],false,p2s,0,eS2);
     if(snap.fallenSide==='right')drawDust(x2,gndY,snap.fallProgress);
+
+    // Score overlay
     cx.textAlign='center';cx.textBaseline='middle';cx.font=`bold ${H*.09}px Bebas Neue,sans-serif`;
-    cx.fillStyle='rgba(249,115,22,.38)';cx.fillText(p1.score,W*.07,H*.17);
-    cx.fillStyle='rgba(96,165,250,.38)';cx.fillText(p2.score,W*.93,H*.17);
+    cx.fillStyle='rgba(249,115,22,.36)';cx.fillText(p1.score,W*.06,H*.17);
+    cx.fillStyle='rgba(96,165,250,.36)';cx.fillText(p2.score,W*.94,H*.17);
   }
 
   function drawM2(){
@@ -714,13 +798,15 @@ const Arena=(()=>{
       const px=b1+(i+.5)*sp1;
       const isAct=!snap.over&&t1.pi===i;
       const st=snap.fallenSide==='left'?'fall':(isAct?(t1.state||'pull'):'idle');
-      drawHumanSide(px,gndY,'#F97316','#C2410C',SK[i%3],HR[i%3],true,st,i);
+      const eS=Math.max(.2,Math.min(1,(px/W)*11,((W-px)/W)*11));
+      drawHumanSide(px,gndY,'#F97316','#C2410C',SK[i%3],HR[i%3],true,st,i,eS);
     }
     for(let i=0;i<n2;i++){
       const px=b2+(i+.5)*sp2;
       const isAct=!snap.over&&t2.pi===i;
       const st=snap.fallenSide==='right'?'fall':(isAct?(t2.state||'pull'):'idle');
-      drawHumanSide(px,gndY,'#1E40AF','#1E3A8A',SK[(i+1)%3],HR[(i+1)%3],false,st,i);
+      const eS=Math.max(.2,Math.min(1,(px/W)*11,((W-px)/W)*11));
+      drawHumanSide(px,gndY,'#1E40AF','#1E3A8A',SK[(i+1)%3],HR[(i+1)%3],false,st,i,eS);
     }
     if(snap.fallenSide==='left')drawDust(W*.12,gndY-H*.1,snap.fallProgress);
     if(snap.fallenSide==='right')drawDust(W*.88,gndY-H*.1,snap.fallProgress);
@@ -902,21 +988,23 @@ const App=(()=>{
   const HOWTO={
     1:{badge:'MODE 1',title:'⚔️ Tarik Tambang',sub:'2 Pemain Individu',steps:[
       {icon:'⏱️',title:'70 Detik',desc:'Setiap pemain punya 70 detik untuk menjawab semua soal.',hl:'-3 dtk benar · -5 dtk salah',hlc:'hs-amber'},
-      {icon:'📋',title:'20 Soal',desc:'Jawab 20 soal Pengetahuan Umum Indonesia. Soal salah masuk antrian lagi!',hl:'Selesaikan 20 soal = Menang!',hlc:'hs-grn'},
-      {icon:'🟠🔵',title:'Oranye vs Biru',desc:'Split screen — Oranye di kiri, Biru di kanan. Karakter maju setiap benar!',hl:'Karakter maju = kamu unggul!',hlc:'hs-grn'},
+      {icon:'📋',title:'20 Soal',desc:'Jawab 20 soal Literasi Digital. Soal salah masuk antrian lagi!',hl:'Selesaikan 20 soal = Menang!',hlc:'hs-grn'},
+      {icon:'🟠🔵',title:'Oranye vs Biru',desc:'Split screen — Oranye kiri, Biru kanan. Karakter bergerak maju tiap jawaban benar!',hl:'Karakter maju = kamu unggul!',hlc:'hs-grn'},
       {icon:'💀',title:'Kalah Jika...',desc:'Waktu habis sebelum selesai, atau lawan menyelesaikan lebih dulu.',hl:'Lawan tuntas = kamu kalah!',hlc:'hs-red'},
+      {icon:'⌨️',title:'Keyboard Laptop',desc:'Pemain Kiri tekan V B N M — Pemain Kanan tekan 1 2 3 4 untuk opsi A B C D.',hl:'💻  V B N M  ·  1 2 3 4',hlc:'hs-amber'},
     ]},
     2:{badge:'MODE 2',title:'🤝 Tim Battle',sub:'2 Tim — Hingga 20 Peserta',steps:[
       {icon:'👥',title:'2 Tim',desc:'Tim Oranye vs Tim Biru! Kedua tim main bersamaan di split screen.',hl:'Layar kiri & kanan aktif serentak',hlc:'hs-grn'},
       {icon:'⏱️',title:'70 Dtk per Giliran',desc:'Setiap anggota tim mendapat 70 detik. Soal dijawab bergiliran.',hl:'-3 dtk benar · -5 dtk salah',hlc:'hs-amber'},
       {icon:'🔄',title:'Bergiliran',desc:'Anggota tampil satu per satu. Soal salah masuk antrian lagi.',hl:'Soal salah muncul lagi!',hlc:'hs-red'},
       {icon:'🏆',title:'Pemenang',desc:'Tim yang selesaikan 20 soal lebih dulu MENANG!',hl:'Tim pertama selesai = JUARA!',hlc:'hs-grn'},
+      {icon:'⌨️',title:'Keyboard Laptop',desc:'Tim Kiri tekan V B N M — Tim Kanan tekan 1 2 3 4 untuk opsi A B C D.',hl:'💻  V B N M  ·  1 2 3 4',hlc:'hs-amber'},
     ]},
     3:{badge:'MODE 3',title:'🌿 Cozy Mode',sub:'Solo Player — Santai',steps:[
       {icon:'🌿',title:'Santai',desc:'Tidak ada timer, tidak ada tekanan. Belajar dengan nyaman.',hl:'Tidak ada batas waktu',hlc:'hs-grn'},
       {icon:'🚶',title:'Jalan ke Finish',desc:'Jawab soal → karakter melangkah maju menuju garis finish!',hl:'20 soal = Sampai Finish!',hlc:'hs-grn'},
       {icon:'📖',title:'Penjelasan',desc:'Setelah setiap jawaban: lihat hasilnya, baca penjelasan, tekan Lanjut.',hl:'Jawaban salah pun tetap dijelaskan',hlc:'hs-amber'},
-      {icon:'🎯',title:'Tujuan',desc:'Tidak ada yang kalah! Semua bisa sampai finish.',hl:'Santai, nikmati prosesnya!',hlc:'hs-grn'},
+      {icon:'⌨️',title:'Keyboard Laptop',desc:'Tekan V B N M atau 1 2 3 4 untuk memilih opsi A B C D.',hl:'💻  V B N M  /  1 2 3 4',hlc:'hs-grn'},
     ]},
   };
 
@@ -1043,7 +1131,8 @@ const App=(()=>{
   function setOpts(side,opts,cb,tc){
     const og=document.getElementById('go-'+side);if(!og)return;og.innerHTML='';
     if(!opts||!opts.length){og.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#64748B;font-size:.82rem;font-weight:600;grid-column:1/-1">Selesai ✓</div>';return;}
-    ['A','B','C','D'].forEach((L,i)=>{const b=document.createElement('button');b.className=`opt opt-${tc}`;b.innerHTML=`<span class="opt-l">${L}</span><span>${opts[i]||''}</span>`;b.addEventListener('click',()=>cb(i));og.appendChild(b);});
+    const keyLabels=side==='left'?['V','B','N','M']:['1','2','3','4'];
+    ['A','B','C','D'].forEach((L,i)=>{const b=document.createElement('button');b.className=`opt opt-${tc}`;b.innerHTML=`<span class="opt-l">${L}</span><span>${opts[i]||''}</span><span class="opt-key">${keyLabels[i]}</span>`;b.addEventListener('click',()=>cb(i));og.appendChild(b);});
   }
   function lockOpts(side,correct,chosen){
     const og=document.getElementById('go-'+side);if(!og)return;
@@ -1414,6 +1503,34 @@ const App=(()=>{
   /* ═══════ HOME / REMATCH ═══════ */
   function goHome(){Confetti.stop();Arena.stopLoop();G={};qHistory=[];resetPanels();go('s-home');}
   function rematch(){Confetti.stop();Arena.stopLoop();G={};qHistory=[];buildSetup(mode);go('s-setup');}
+
+  /* ═══════ KEYBOARD CONTROLS (LAPTOP) ═══════ */
+  // Tim Kiri / Pemain Oranye: V B N M → A B C D
+  // Tim Kanan / Pemain Biru : 1 2 3 4 → A B C D
+  const LEFT_KEYS={'V':0,'B':1,'N':2,'M':3};
+  const RIGHT_KEYS={'1':0,'2':1,'3':2,'4':3};
+  document.addEventListener('keydown',e=>{
+    if(cur!=='s-game'||paused)return;
+    // Don't hijack when typing in input
+    if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;
+    const k=e.key.toUpperCase();
+    function clickOpt(side,idx){
+      const og=document.getElementById('go-'+side);
+      if(!og)return;
+      const bs=og.querySelectorAll('.opt');
+      if(bs[idx]&&!bs[idx].disabled){e.preventDefault();bs[idx].click();}
+    }
+    if(mode===1){
+      if(LEFT_KEYS[k]!==undefined&&!G.p1?.locked&&!G.over)clickOpt('left',LEFT_KEYS[k]);
+      if(RIGHT_KEYS[k]!==undefined&&!G.p2?.locked&&!G.over)clickOpt('right',RIGHT_KEYS[k]);
+    } else if(mode===2){
+      if(LEFT_KEYS[k]!==undefined&&!G.t1lock&&!G.over)clickOpt('left',LEFT_KEYS[k]);
+      if(RIGHT_KEYS[k]!==undefined&&!G.t2lock&&!G.over)clickOpt('right',RIGHT_KEYS[k]);
+    } else if(mode===3){
+      const ck={...LEFT_KEYS,...RIGHT_KEYS};
+      if(ck[k]!==undefined&&!G.cozyLock&&!G.over)clickOpt('left',ck[k]);
+    }
+  });
 
   /* ═══════ RESIZE ═══════ */
   window.addEventListener('resize',()=>{Arena.resize();});
